@@ -1,6 +1,6 @@
 {
   "Go": {
-    "DefaultVersion": "go1.12.16",
+    "DefaultVersion": "go1.14rc1",
     "VersionExpansion": {
       "go1.14.0": "go1.14rc1",
       "go1.14": "go1.14rc1",
