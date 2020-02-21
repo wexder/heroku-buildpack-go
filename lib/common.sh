@@ -429,8 +429,9 @@ determineTool() {
             warn "GB is only supported up to $newVer, using that instead of $ver."
             warn ""
             warn "GB support will be removed from a future version of the"
-            warn "buildpack, please convert to go modules."
+            warn "buildpack, please convert to Go modules."
             warn ""
+            ver="${newVer}"
         fi
 
         TOOL="gb"
