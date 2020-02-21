@@ -323,7 +323,7 @@ doesNotSupportGoModules() {
 supportsGB() {
     local version="${1}"
     # Ex:      "go1.10.4" | ["go1","10", "4"] | ["1","10","4"]     | [1,10,4]      |  [1]           [10]      == exit 0 (pass)
-    echo "\"${version}\"" | jq -e 'split(".") | map(gsub("go";"")) | map(tonumber) | .[0] >= 1 and .[1] <= 12' &> /dev/null
+    echo "\"${version}\"" | jq -e 'split(".") | map(gsub("go";"")) | map(tonumber) | .[0] == 1 and .[1] <= 12' &> /dev/null
 }
 
 determineTool() {
@@ -425,14 +425,12 @@ determineTool() {
         setGoVersionFromEnvironment
 
         if ! supportsGB "${ver}"; then
-            err "You are using ${ver}, which does not support GB."
-            err ""
-            err "GB is supported with go1.12 and below."
-            err ""
-            err "Run 'heroku config:set GOVERSION=goX.Y' to set the Go version to use"
-            err "for future builds, then commit and push again."
-            err ""
-            exit 1
+            newVer="$(expandVer "go1.12")"
+            warn "GB is only supported up to $newVer, using that instead of $ver."
+            warn ""
+            warn "GB support will be removed from a future version of the"
+            warn "buildpack, please convert to go modules."
+            warn ""
         fi
 
         TOOL="gb"

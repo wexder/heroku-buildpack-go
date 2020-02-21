@@ -570,14 +570,13 @@ testTestPackGodepWithTestsSkipBenchmark() {
 }
 
 testTestPackGBWithTestsSkipBenchmark() {
-  env "GOVERSION" "1.12"
-
   fixture "gb-with-tests"
 
   env "GO_TEST_SKIP_BENCHMARK" "nope"
 
   dotest
   assertCapturedSuccess
+  assertCaptured "GB is only supported up to go1.12"
   assertCaptured "RUN   TestHello"
   assertCaptured "PASS: TestHello"
   assertCaptured "RUN   ExampleHello"
@@ -622,24 +621,16 @@ testTestPackGodepWithTests() {
 }
 
 testTestPackGBWithTests() {
-  env "GOVERSION" "1.12"
-
   fixture "gb-with-tests"
 
   dotest
+  assertCaptured "GB is only supported up to go1.12"
   assertCapturedSuccess
   assertCaptured "RUN   TestHello"
   assertCaptured "PASS: TestHello"
   assertCaptured "RUN   ExampleHello"
   assertCaptured "PASS: ExampleHello"
   assertCaptured "BenchmarkHello"
-}
-
-testTestPackGBWithTestsFailsPost112() {
-  fixture "gb-with-tests"
-
-  dotest
-  assertCapturedError "GB is supported with go1.12 and below"
 }
 
 testGlideWithHgDep() {
@@ -1077,8 +1068,6 @@ testGodepMalformed() {
 }
 
 testGBVendor() {
-  env "GOVERSION" "1.12"
-
   fixture "gb-vendor"
 
   assertDetected
@@ -1089,22 +1078,12 @@ testGBVendor() {
   assertCaptured "Running: gb build -tags heroku"
   assertCaptured "cmd/fixture"
   assertCaptured "Post Compile Cleanup"
+  assertCaptured "GB is only supported up to go1.12"
   assertCapturedSuccess
   assertCompiledBinaryExists
-}
-
-testGBVendorFailsPost112() {
-  fixture "gb-vendor"
-
-  assertDetected
-
-  compile
-  assertCapturedError "GB is supported with go1.12 and below"
 }
 
 testGBBasic() {
-  env "GOVERSION" "1.12"
-
   fixture "gb-basic"
 
   assertDetected
@@ -1115,22 +1094,12 @@ testGBBasic() {
   assertCaptured "Running: gb build -tags heroku"
   assertCaptured "cmd/fixture"
   assertCaptured "Post Compile Cleanup"
+  assertCaptured "GB is only supported up to go1.12"
   assertCapturedSuccess
   assertCompiledBinaryExists
 }
 
-testGBBasicFailsPost112() {
-  fixture "gb-basic"
-
-  assertDetected
-
-  compile
-  assertCapturedError "GB is supported with go1.12 and below"
-}
-
 testGBBasicWithTools() {
-  env "GOVERSION" "1.12"
-
   fixture "gb-basic"
 
   env "GO_INSTALL_TOOLS_IN_IMAGE" "true"
@@ -1145,6 +1114,7 @@ testGBBasicWithTools() {
   assertCaptured "Post Compile Cleanup"
   assertCaptured "Copying go tool chain to"
   assertCaptured "Copying gb binary"
+  assertCaptured "GB is only supported up to go1.12"
   assertCapturedSuccess
   assertCompiledBinaryExists
   assertBuildDirFileExists ".heroku/go/bin/go"
