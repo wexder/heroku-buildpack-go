@@ -423,7 +423,7 @@ mcount "pkgmanagement.$TOOL"
 
 mainPackagesInModule() {
   # For an explanation of what this is doing, see https://dave.cheney.net/2014/09/14/go-list-your-swiss-army-knife
-  go list -find -mod=vendor -f '{{ if eq .Name "main" }} {{.ImportPath}} {{ end }}' ./...
+  go list -find "${FLAGS[@]}" -f '{{ if eq .Name "main" }} {{.ImportPath}} {{ end }}' ./...
 }
 
 setupProcfile() {
@@ -463,6 +463,11 @@ setupProcfile() {
 case "${TOOL}" in
     gomodules)
         cd ${build}
+
+        if [ -d "${build}/vendor" -a -s "${build}/go.sum" ]; then
+            FLAGS+=(-mod=vendor)
+        fi
+
         step "Determining packages to install"
         pkgs=${GO_INSTALL_PACKAGE_SPEC:-$(awk '{ if ($1 == "//" && $2 == "+heroku" && $3 == "install" ) { print substr($0, index($0,$4)); exit }}' ${goMOD})}
         if [ -z "${pkgs}" ]; then
@@ -499,10 +504,6 @@ case "${TOOL}" in
         warnPackageSpecOverride
         handleDefaultPkgSpec
         massagePkgSpecForVendor
-
-        if [ -d "${build}/vendor" -a -s "${build}/go.sum" ]; then
-            FLAGS+=(-mod=vendor)
-        fi
 
         unset GIT_DIR # unset git dir or it will mess with goinstall
         export GOBIN="${build}/bin"

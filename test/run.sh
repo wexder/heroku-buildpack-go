@@ -81,14 +81,14 @@ testModDepsRecompile() {
   assertGoInstallOnlyFixturePackageCaptured
 
   # The other deps are downloaded/installed
-  assertCaptured "
+  assertFileContains "
 go: finding github.com/gorilla/mux v1.6.2
 go: finding github.com/gorilla/context v1.1.1
 go: downloading github.com/gorilla/mux v1.6.2
 go: extracting github.com/gorilla/mux v1.6.2
 github.com/gorilla/mux
-"
-  assertCapturedSuccess
+" "$STD_ERR"
+  assertEquals "Expected captured exit code to be 0; was <${RETURN}>" "0" "${RETURN}"
   assertInstalledFixtureBinary
 
   # Second compile
