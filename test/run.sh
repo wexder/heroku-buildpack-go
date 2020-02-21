@@ -570,6 +570,8 @@ testTestPackGodepWithTestsSkipBenchmark() {
 }
 
 testTestPackGBWithTestsSkipBenchmark() {
+  env "GOVERSION" "1.12"
+
   fixture "gb-with-tests"
 
   env "GO_TEST_SKIP_BENCHMARK" "nope"
@@ -620,6 +622,8 @@ testTestPackGodepWithTests() {
 }
 
 testTestPackGBWithTests() {
+  env "GOVERSION" "1.12"
+
   fixture "gb-with-tests"
 
   dotest
@@ -629,6 +633,13 @@ testTestPackGBWithTests() {
   assertCaptured "RUN   ExampleHello"
   assertCaptured "PASS: ExampleHello"
   assertCaptured "BenchmarkHello"
+}
+
+testTestPackGBWithTestsFailsPost112() {
+  fixture "gb-with-tests"
+
+  dotest
+  assertCapturedError "GB is supported with go1.12 and below"
 }
 
 testGlideWithHgDep() {
@@ -1092,6 +1103,8 @@ testGBVendorFailsPost112() {
 }
 
 testGBBasic() {
+  env "GOVERSION" "1.12"
+
   fixture "gb-basic"
 
   assertDetected
@@ -1106,7 +1119,18 @@ testGBBasic() {
   assertCompiledBinaryExists
 }
 
+testGBBasicFailsPost112() {
+  fixture "gb-basic"
+
+  assertDetected
+
+  compile
+  assertCapturedError "GB is supported with go1.12 and below"
+}
+
 testGBBasicWithTools() {
+  env "GOVERSION" "1.12"
+
   fixture "gb-basic"
 
   env "GO_INSTALL_TOOLS_IN_IMAGE" "true"
