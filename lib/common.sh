@@ -431,7 +431,7 @@ determineTool() {
             err ""
             err "Run 'heroku config:set GOVERSION=goX.Y' to set the Go version to use"
             err "for future builds, then commit and push again."
-	    err ""
+            err ""
             exit 1
         fi
 
