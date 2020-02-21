@@ -58,7 +58,7 @@ testModProcfileCreation() {
   fixture "mod-cmd-web"
 
   assertDetected
-  
+
   compile
   assertModulesBoilerplateCaptured
   assertGoInstallCaptured
@@ -163,7 +163,7 @@ github.com/heroku/fixture/cmd/other"
 
   assertFile "fixture: bin/fixture
 other: bin/other" "Procfile"
-  
+
   assertCapturedSuccess
   assertInstalledFixtureBinary
   assertCompiledBinaryExists other
@@ -198,7 +198,7 @@ testModNoVersion() {
   assertModulesBoilerplateCaptured
   assertGoInstallCaptured
   assertGoInstallOnlyFixturePackageCaptured
- 
+
   assertCapturedSuccess
   assertInstalledFixtureBinary
 }
@@ -1066,6 +1066,8 @@ testGodepMalformed() {
 }
 
 testGBVendor() {
+  env "GOVERSION" "1.12"
+
   fixture "gb-vendor"
 
   assertDetected
@@ -1078,6 +1080,15 @@ testGBVendor() {
   assertCaptured "Post Compile Cleanup"
   assertCapturedSuccess
   assertCompiledBinaryExists
+}
+
+testGBVendorFailsPost112() {
+  fixture "gb-vendor"
+
+  assertDetected
+
+  compile
+  assertCapturedError "GB is supported with go1.12 and below"
 }
 
 testGBBasic() {

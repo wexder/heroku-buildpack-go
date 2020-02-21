@@ -707,4 +707,3 @@ echo "TOOL=${TOOL}" > "${t}"
 if [ "${TOOL}" != "gb" ]; then
     echo "NAME=${name}" >> "${t}"
 fi
-

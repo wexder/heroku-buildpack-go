@@ -314,10 +314,16 @@ setGoVersionFromEnvironment() {
     ver=${GOVERSION:-$DefaultGoVersion}
 }
 
-supportsGoModules() {
+doesNotSupportGoModules() {
     local version="${1}"
-    # Ex:      "go1.10.4" | ["go1","10", "4"] | ["1","10","4"]     | [1,10,4]      |  [1]           [10]      == exit 1 (fail)
+    # Ex:      "go1.10.4" | ["go1","10", "4"] | ["1","10","4"]     | [1,10,4]      |  [1]           [10]      == exit 0 (pass)
     echo "\"${version}\"" | jq -e 'split(".") | map(gsub("go";"")) | map(tonumber) | .[0] >= 1 and .[1] < 11' &> /dev/null
+}
+
+supportsGB() {
+    local version="${1}"
+    # Ex:      "go1.10.4" | ["go1","10", "4"] | ["1","10","4"]     | [1,10,4]      |  [1]           [10]      == exit 0 (pass)
+    echo "\"${version}\"" | jq -e 'split(".") | map(gsub("go";"")) | map(tonumber) | .[0] >= 1 and .[1] <= 12' &> /dev/null
 }
 
 determineTool() {
@@ -341,7 +347,7 @@ determineTool() {
             warn ""
         fi
 
-        if supportsGoModules "${ver}"; then
+        if doesNotSupportGoModules "${ver}"; then
             err "You are using ${ver}, which does not support Go modules"
             err ""
             err "Go modules are supported by go1.11 and above."
@@ -416,8 +422,20 @@ determineTool() {
         TOOL="glide"
         setGoVersionFromEnvironment
     elif [ -d "$build/src" -a -n "$(find "$build/src" -mindepth 2 -type f -name '*.go' | sed 1q)" ]; then
-        TOOL="gb"
         setGoVersionFromEnvironment
+
+        if ! supportsGB "${ver}"; then
+            err "You are using ${ver}, which does not support GB."
+            err ""
+            err "GB is supported with go1.12 and below."
+            err ""
+            err "Run 'heroku config:set GOVERSION=goX.Y' to set the Go version to use"
+            err "for future builds, then commit and push again."
+	    err ""
+            exit 1
+        fi
+
+        TOOL="gb"
     else
         err "Go modules, dep, Godep, GB or govendor are required. For instructions:"
         err "https://devcenter.heroku.com/articles/go-support"
