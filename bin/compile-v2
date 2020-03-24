@@ -1,0 +1,161 @@
+#!/bin/bash
+
+set -eo pipefail
+
+mkdir -p "$1" "$2"
+build="$(cd "$1/" && pwd)"
+cache="$(cd "$2/" && pwd)"
+env_dir="$3"
+
+go_download_base="${GO_DOWNLOAD_BASE:-https://dl.google.com/go}"
+
+old_cache_key_d="$cache/key.d"
+new_cache_key_d="$(mktemp -d)"
+
+cacheKeySet() {
+    echo "$2" > "$new_cache_key_d/$1"
+}
+
+cacheKeyGet() {
+    key="$1"
+    src="$2"
+    prefix="$new_cache_key_d"
+    [ -n "$src" ] && [ "$src" == "old" ] && prefix="$old_cache_key_d"
+    file="$prefix/$key"
+    [ -r "$file" ] && cat "$file"
+}
+
+cacheKeyChanged() {
+    [ "$(cacheKeyGet "$1" old)" != "$(cacheKeyGet "$1" new)" ]
+}
+
+cacheKeyNew() {
+    key="$1"
+    [ ! -e "$old_cache_key_d/$key" ] && [ -e "$new_cache_key_d/$key" ]
+}
+
+cacheKeyDSave() {
+    rm -rf "$old_cache_key_d"
+    mv "$new_cache_key_d" "$old_cache_key_d"
+}
+
+cacheClear() {
+    rm -rf "${cache:?}"/*
+    # If the entire cache is now invalid, so is the old key directory.
+    rm -rf "$old_cache_key_d"
+}
+
+cd "$build"
+
+if ! [ -f "go.mod" ]; then
+    echo "go.mod required" >&2
+    exit 1
+fi
+
+cacheKeySet stack "$STACK"
+if cacheKeyChanged stack; then
+    if ! cacheKeyNew stack; then
+	echo "stack change detected, clearing cache"
+    fi
+    cacheClear
+fi
+
+verSource="default"
+ver="go1.14.1"
+
+if [ -s "$env_dir/GOVERSION" ]; then
+    verSource="GOVERSION"
+    ver="$(< "$env_dir/GOVERSION")"
+else
+    verGoMod="$(awk '{ if ($1 == "//" && $2 == "+heroku" && $3 == "goVersion" ) { print $4; exit } }' go.mod)"
+    if [ -n "$verGoMod" ]; then
+	verSource="go.mod"
+	ver="$verGoMod"
+    fi
+fi
+
+echo "version $ver requested via $verSource"
+
+cacheKeySet go "$ver"
+if cacheKeyChanged go; then
+    if ! cacheKeyNew go; then
+	echo "previous version $(cacheKeyGet go old), clearing cache"
+    fi
+    cacheClear
+
+    echo "fetching"
+    curl --retry 5 --retry-delay 5 --location --silent --fail "$go_download_base/$ver.linux-amd64.tar.gz" -o "$cache/go.tgz"
+
+    verChecksum=""
+    case "$ver" in
+	"go1.14")
+	    verChecksum="08df79b46b0adf498ea9f320a0f23d6ec59e9003660b4c9c1ce8e5e2c6f823ca"
+	    ;;
+	"go1.14.1")
+	    verChecksum="2f49eb17ce8b48c680cdb166ffd7389702c0dec6effa090c324804a5cac8a7f8"
+	    ;;
+    esac
+    if [ -n "$verChecksum" ]; then
+	echo "$verChecksum  $cache/go.tgz" | shasum -a 256 -c - >/dev/null
+    else
+	echo "warning: no known checksum for $ver"
+    fi
+
+    echo "extracting"
+    mkdir "$cache/go"
+    tar -C "$cache/go" --strip-components=1 -zxf "$cache/go.tgz"
+    rm "$cache/go.tgz"
+
+    mkdir "$cache/tmp"
+
+    cat > "$cache/tmp/version_check.go" <<'EOF'
+package main
+import (
+  "os"
+  "regexp"
+  "runtime"
+  "strconv"
+)
+func main() {
+  re := regexp.MustCompile("go(\\d+)\\.(\\d+)")
+  m := re.FindStringSubmatch(runtime.Version())
+  if m == nil { os.Exit(1) }
+  maj, err := strconv.Atoi(m[1])
+  if err != nil { os.Exit(1) }
+  if maj < 1 { os.Exit(1) }
+  if maj > 1 { return }
+  min, err := strconv.Atoi(m[2])
+  if err != nil { os.Exit(1) }
+  if min < 14 { os.Exit(1) }
+}
+EOF
+
+    if ! "$cache/go/bin/go" run "$cache/tmp/version_check.go"; then
+	echo "only go1.14 or greater supported" >&2
+	exit 1
+    fi
+
+    rm -rf "$cache/tmp"
+fi
+
+export PATH="$cache/go/bin:$PATH"
+export GOCACHE="$cache/go/build-cache"
+export GOPATH="$cache/go/go-path"
+export GOBIN="$build/bin" # will be created if necessary
+
+echo "building"
+pkgs=()
+goModPkgs="$(awk '{ if ($1 == "//" && $2 == "+heroku" && $3 == "install" ) { print substr($0, index($0, $4)); exit } }' go.mod | xargs -n1)"
+if [ -n "$goModPkgs" ]; then
+    mapfile -t pkgs < <(echo "$goModPkgs" | xargs -n1)
+else
+    mapfile -t pkgs < <(go list -find -f '{{ if eq .Name "main" }}{{.ImportPath}}{{ end }}' ./...)
+fi
+go install -v "${pkgs[@]}"
+
+mkdir -p "$build/.profile.d"
+cat > "$build/.profile.d/go.sh" <<'EOF'
+PATH="$PATH:$HOME/bin"
+EOF
+
+cacheKeyDSave

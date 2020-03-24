@@ -25,6 +25,8 @@ mkdir ${TMP}/vendor
 
 # These are the files that are available during release
 ctt bin/compile
+ctt bin/compile-v1
+ctt bin/compile-v2
 ctt bin/detect
 ctt bin/test
 ctt bin/test-compile

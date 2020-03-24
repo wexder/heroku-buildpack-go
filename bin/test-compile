@@ -18,7 +18,7 @@ else
 fi
 
 buildpack="${testpack}"
-source ${testpack}/bin/compile "${build}" "${cache}" "${env_dir}"
+source ${testpack}/bin/compile-v1 "${build}" "${cache}" "${env_dir}"
 
 if [ -f "${build}/.golangci.yml" -o -f "${build}/.golangci.toml" -o -f "${build}/.golangci.json" ]; then
     step "/.golangci.{yml,toml,json} detected"
