@@ -1,7 +1,7 @@
 #!/bin/bash
 # usage: bin/test <build-dir> <env-dir> <artifact-dir>
 
-set -eo pipefail
+set -xeo pipefail
 
 mkdir -p "${1}" "${2}"
 build="$(cd ${1}/ && pwd)"
