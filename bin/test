@@ -1,7 +1,7 @@
 #!/bin/bash
 # usage: bin/test <build-dir> <env-dir> <artifact-dir>
 
-set -xeo pipefail
+set -eo pipefail
 
 mkdir -p "${1}" "${2}"
 build="$(cd ${1}/ && pwd)"
@@ -20,6 +20,8 @@ if [ ! -z "${env_dir}" ]; then
         fi
     done
 fi
+
+set -x
 
 if [ -f "${build}/.heroku/go/.meta" ]; then
   source "${build}/.heroku/go/.meta"
@@ -62,6 +64,11 @@ case "${TOOL}" in
           _tflags+=("-mod=readonly")
         fi
         step "Running Tests With: go test ${_tflags[@]} ./... | patter"
+        echo "### go list" >>"${output}"
+        go list -race -mod=readonly ./... >>"$output" 2>&1 || true
+        echo "### go test -n" >>"${output}"
+        go test -n ${_tflags[@]} ./... >>"$output" 2>&1 || true
+        echo "### go test" >>"${output}"
         if ! go test ${_tflags[@]} ./... 2>&1 | tee -a ${output} | patter; then
             step
             step "Standard (Non TAP) test output"
