@@ -63,11 +63,10 @@ case "${TOOL}" in
         fi
         step "Running Tests With: go test ${_tflags[@]} ./... | patter"
         if ! go test ${_tflags[@]} ./... 2>&1 | tee -a ${output} | patter; then
-            st=$?
             step
             step "Standard (Non TAP) test output"
             cat "${output}"
-            exit $st
+            exit 1
         fi
         step
         if [[ -z "${GO_TEST_SKIP_BENCHMARK}" ]]; then
