@@ -377,6 +377,7 @@ setupGOPATH() {
 
 installPkgs() {
     step "Running: go install -v ${FLAGS[@]} ${pkgs}"
+    go env
     go install -v "${FLAGS[@]}" ${pkgs} 2>&1
 }
 
@@ -423,6 +424,7 @@ export GOPATH
 mcount "pkgmanagement.$TOOL"
 
 mainPackagesInModule() {
+  go env
   # For an explanation of what this is doing, see https://dave.cheney.net/2014/09/14/go-list-your-swiss-army-knife
   go list -find "${FLAGS[@]}" -f '{{ if eq .Name "main" }} {{.ImportPath}} {{ end }}' ./...
 }
