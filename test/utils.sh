@@ -173,6 +173,7 @@ assertCapturedNotEquals() {
 }
 
 assertCaptured() {
+    cat "$STD_OUT"
   assertFileContains "$@" "${STD_OUT}"
 }
 
