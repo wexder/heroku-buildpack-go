@@ -3,6 +3,8 @@
 
 set -eo pipefail
 
+echo $@
+
 mkdir -p "$1" "$2"
 build=$(cd "$1/" && pwd)
 cache=$(cd "$2/" && pwd)
@@ -559,7 +561,7 @@ case "${TOOL}" in
 
         step "Determining packages to install"
         printenv
-        pkgs=${GO_INSTALL_PACKAGE_SPEC:-$(awk '{ if ($1 == "//" && $2 == "+heroku" && $3 == "install" ) { print substr($0, index($0,$4)); exit }}' ${goMOD})}
+        pkgs=${GO_INSTALL_PACKAGE_SPEC:-$(awk '{ if ($1 == "//" && $2 == "+heroku" && $3 == "install" ) { print substr($0, index($0,$4)); exit }}' ${goWork})}
         if [ -z "${pkgs}" ]; then
             pkgs=$(mainPackagesInModule)
             if [ -z "${pkgs}" ]; then
