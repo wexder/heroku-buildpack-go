@@ -29,20 +29,6 @@ GolangMigrateVersion="$(<${DataJSON} jq -r '.GolangMigrate.DefaultVersion')"
 TQVersion="$(<${DataJSON} jq -r '.tq.DefaultVersion')"
 
 
-export_env_dir() {
-  info "Exporting env vars"
-  env_dir=$1
-  acceptlist_regex=${2:-''}
-  denylist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'}
-  if [ -d "$env_dir" ]; then
-    for e in $(ls $env_dir); do
-      echo "$e" | grep -E "$acceptlist_regex" | grep -qvE "$denylist_regex" &&
-      export "$e=$(cat $env_dir/$e)"
-      :
-    done
-  fi
-}
-export_env_dir
 # For specified versions of Go we need to keep concurrency.sh
 needConcurrency() {
     <"${DataJSON}" jq -e '.Go.NeedsConcurrency | any(. == "'${1}'")' &> /dev/null
@@ -574,7 +560,6 @@ case "${TOOL}" in
         fi
 
         step "Determining packages to install"
-        export_env_dir
         printenv
         pkgs=${GO_INSTALL_PACKAGE_SPEC:-$(awk '{ if ($1 == "//" && $2 == "+heroku" && $3 == "install" ) { print substr($0, index($0,$4)); exit }}' ${goWork})}
         if [ -z "${pkgs}" ]; then
