@@ -3,7 +3,6 @@
 
 set -eo pipefail
 
-echo $@
 
 mkdir -p "$1" "$2"
 build=$(cd "$1/" && pwd)
@@ -28,6 +27,8 @@ BazaarVersion="$(<${DataJSON} jq -r '.BZR.DefaultVersion')"
 MattesMigrateVersion="$(<${DataJSON} jq -r '.MattesMigrate.DefaultVersion')"
 GolangMigrateVersion="$(<${DataJSON} jq -r '.GolangMigrate.DefaultVersion')"
 TQVersion="$(<${DataJSON} jq -r '.tq.DefaultVersion')"
+
+info "debug: $@"
 
 # For specified versions of Go we need to keep concurrency.sh
 needConcurrency() {
