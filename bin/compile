@@ -30,8 +30,9 @@ TQVersion="$(<${DataJSON} jq -r '.tq.DefaultVersion')"
 
 
 export_env_dir() {
+  info "Exporting env vars"
   env_dir=$1
-  acceptlist_regex=${2:-'^(DATABASE_URL)$'}
+  acceptlist_regex=${2:-''}
   denylist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'}
   if [ -d "$env_dir" ]; then
     for e in $(ls $env_dir); do
@@ -41,7 +42,7 @@ export_env_dir() {
     done
   fi
 }
-
+export_env_dir
 # For specified versions of Go we need to keep concurrency.sh
 needConcurrency() {
     <"${DataJSON}" jq -e '.Go.NeedsConcurrency | any(. == "'${1}'")' &> /dev/null

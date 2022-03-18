@@ -223,6 +223,7 @@ loadEnvDir() {
     envFlags+=("GO_SETUP_GOPATH_FOR_MODULE_CACHE")
     envFlags+=("GO_TEST_SKIP_BENCHMARK")
     envFlags+=("GLIDE_SKIP_INSTALL")
+    envFlags+=("DATABASE_URL")
     local env_dir="${1}"
     if [ ! -z "${env_dir}" ]; then
         mkdir -p "${env_dir}"
