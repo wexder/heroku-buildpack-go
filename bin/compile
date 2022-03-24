@@ -529,7 +529,7 @@ case "${TOOL}" in
         if [[ -f bin/go-pre-compile ]]; then
             step "Running bin/go-pre-compile hook"
             chmod a+x bin/go-pre-compile
-            bin/go-pre-compile
+            bin/go-pre-compile "$@"
         fi
 
         installPkgs
@@ -537,7 +537,7 @@ case "${TOOL}" in
         if [[ -f bin/go-post-compile ]]; then
             step "Running bin/go-post-compile hook"
             chmod a+x bin/go-post-compile
-            bin/go-post-compile
+            bin/go-post-compile "$@"
         fi
     ;;
     goworkspaces)
@@ -560,7 +560,6 @@ case "${TOOL}" in
         fi
 
         step "Determining packages to install"
-        printenv
         pkgs=${GO_INSTALL_PACKAGE_SPEC:-$(awk '{ if ($1 == "//" && $2 == "+heroku" && $3 == "install" ) { print substr($0, index($0,$4)); exit }}' ${goWork})}
         if [ -z "${pkgs}" ]; then
             pkgs=$(mainPackagesInModule)
