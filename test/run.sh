@@ -340,6 +340,20 @@ testModBasicGo118() {
   assertInstalledFixtureBinary
 }
 
+testModBasicGo119() {
+  fixture "mod-basic-go119"
+
+  assertDetected
+
+  compile
+  assertModulesBoilerplateCaptured
+  assertCaptured "Installing go1.19"
+  assertGoInstallOnlyFixturePackageCaptured
+
+  assertCapturedSuccess
+  assertInstalledFixtureBinary
+}
+
 testModBasicWithoutProcfile() {
   fixture "mod-basic-wo-procfile"
 
@@ -367,7 +381,7 @@ testModPrivateProxy() {
 
   compile
   assertModulesBoilerplateCaptured
-  assertGoInstallCaptured
+  assertGoInstallCaptured "go1.15.15"
   assertGoInstallOnlyFixturePackageCaptured
 
   assertCapturedExitSuccess

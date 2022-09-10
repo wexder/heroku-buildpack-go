@@ -1,8 +1,37 @@
 # Go Buildpack Changelog
 
 ## Unreleased
-* Stop suppressing error output from `go list`
-* Document how to install additional tools with go modules
+
+## v168 (2022-09-08)
+* Add go1.19
+* Add go1.19.1
+* Add go1.18.6
+* go1.18 defaults to 1.18.6
+* go1.19 defaults to 1.19.1
+
+## v166 (2022-06-15)
+* Re-release of the changes in v164.
+
+## v165 (2022-06-14)
+* Temporary rollback of the v164 release.
+
+## v164 (2022-06-14)
+* Adjust curl retry and connection timeout handling
+* Switch to the recommended regional S3 domain instead of the global one
+
+## v163 (2022-06-09), v167 (published by mistake 2022-09-08)
+* Use the go version in `go.mod` if no `+heroku` comment is found (#378/#411)
+* Add go1.18.3
+* go1.18 defaults to 1.18.3
+
+## v162 (2022-03-23)
+* Add go1.17.9
+* Add go1.17.10
+* Add go1.18.1
+* Add go1.18.2
+* go1.17 defaults to 1.17.10
+* go1.18 defaults to 1.18.2
+* Add Heroku-22 to the Circle CI test matrix.
 
 ## v161 (2022-03-15)
 * Add go1.15.11
@@ -25,6 +54,10 @@
 * go1.17 defaults to 1.17.8
 * go1.16 defaults to 1.16.15
 * go1.15 defaults to 1.15.15
+
+## v160 (2021-11-30)
+* Stop suppressing error output from `go list`
+* Document how to install additional tools with go modules
 
 ## v159 (2021-11-30)
 * Republish v157 (with missing binaries)
